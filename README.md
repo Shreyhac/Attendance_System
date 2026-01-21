@@ -602,16 +602,175 @@ app:
 
 ---
 
+## 📊 Analytics APIs
+
+### Overview
+Comprehensive analytics endpoints providing insights for students, teachers, and subjects. Track attendance trends, identify struggling students, and make data-driven decisions.
+
+### Student Analytics
+
+#### GET /api/analytics/student/{email}/overview
+Get comprehensive analytics overview for a student.
+
+**Authorization**: STUDENT role (own data only)
+
+**Response:**
+```json
+{
+  "studentEmail": "student1@example.com",
+  "studentName": "John Doe",
+  "overallPercentage": 85.5,
+  "totalClasses": 120,
+  "attendedClasses": 103,
+  "subjectWiseAttendance": [
+    {
+      "subjectId": "...",
+      "subjectName": "Mathematics",
+      "totalClasses": 40,
+      "attendedClasses": 36,
+      "percentage": 90.0
+    }
+  ]
+}
+```
+
+#### GET /api/analytics/student/{email}/subject/{subjectId}
+Get detailed analytics for a specific subject.
+
+**Authorization**: STUDENT role
+
+#### GET /api/analytics/student/{email}/trends?days=30
+Get attendance trends over the last N days.
+
+**Authorization**: STUDENT role
+
+**Query Parameters:**
+- `days` (optional, default: 30) - Number of days to analyze
+
+---
+
+### Teacher Analytics
+
+#### GET /api/analytics/teacher/subject/{subjectId}/summary?threshold=75
+Get comprehensive subject analytics for teachers.
+
+**Authorization**: TEACHER role
+
+**Query Parameters:**
+- `threshold` (optional, default: 75.0) - Attendance threshold percentage
+
+**Response:**
+```json
+{
+  "subjectId": "...",
+  "subjectName": "Mathematics",
+  "totalClasses": 45,
+  "totalStudents": 30,
+  "averageAttendance": 82.5,
+  "distribution": {
+    "excellent": 12,
+    "good": 10,
+    "poor": 8
+  },
+  "defaulters": [
+    {
+      "studentEmail": "student@example.com",
+      "studentName": "Jane Doe",
+      "attendancePercentage": 65.0,
+      "totalClasses": 45,
+      "attendedClasses": 29
+    }
+  ]
+}
+```
+
+#### GET /api/analytics/teacher/subject/{subjectId}/defaulters?threshold=75
+Get list of students with attendance below threshold.
+
+**Authorization**: TEACHER role
+
+**Query Parameters:**
+- `threshold` (optional, default: 75.0) - Attendance threshold percentage
+
+#### GET /api/analytics/teacher/subject/{subjectId}/distribution
+Get attendance distribution (excellent/good/poor).
+
+**Authorization**: TEACHER role
+
+**Response:**
+```json
+{
+  "excellent": 12,
+  "good": 10,
+  "poor": 8
+}
+```
+
+---
+
+### Subject Analytics
+
+#### GET /api/analytics/subject/{subjectId}/stats
+Get subject-level statistics.
+
+**Authorization**: All authenticated users
+
+**Response:**
+```json
+{
+  "subjectId": "...",
+  "subjectName": "Mathematics",
+  "teacherEmail": "teacher@example.com",
+  "totalClasses": 45,
+  "totalRecords": 1350,
+  "averageAttendance": 82.5
+}
+```
+
+#### GET /api/analytics/subject/{subjectId}/trends?days=30
+Get subject attendance trends over time.
+
+**Authorization**: All authenticated users
+
+**Query Parameters:**
+- `days` (optional, default: 30) - Number of days to analyze
+
+**Response:**
+```json
+[
+  {
+    "date": "2026-01-15",
+    "attendancePercentage": 85.0,
+    "present": 25,
+    "absent": 5,
+    "total": 30
+  }
+]
+```
+
+---
+
+### Analytics Features
+
+- **Real-time Calculations**: All analytics computed on-demand
+- **Date Range Filtering**: Analyze specific time periods
+- **Trend Analysis**: Track attendance patterns over time
+- **Distribution Analysis**: Categorize students by performance
+- **Defaulter Identification**: Automatically identify at-risk students
+- **Subject Comparison**: Compare performance across subjects
+
+---
+
 ## 🔄 Future Enhancements
 
 - [ ] Admin dashboard for user management
 - [ ] Bulk attendance marking
-- [ ] Attendance reports and analytics
+- [x] Attendance reports and analytics ✅
 - [x] Email notifications for low attendance ✅
 - [x] API rate limiting ✅
 - [ ] Export attendance to CSV/PDF
-- [ ] Subject-wise attendance breakdown
-- [ ] Date range filtering
+- [x] Subject-wise attendance breakdown ✅
+- [x] Date range filtering ✅
 - [ ] Password reset functionality via email
 - [ ] Profile management
 - [ ] Dark/Light theme toggle

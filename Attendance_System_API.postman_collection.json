@@ -642,6 +642,286 @@
             ]
         },
         {
+            "name": "Analytics APIs",
+            "item": [
+                {
+                    "name": "Student Analytics",
+                    "item": [
+                        {
+                            "name": "Get Student Overview",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/student/student1@example.com/overview",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "student",
+                                        "student1@example.com",
+                                        "overview"
+                                    ]
+                                },
+                                "description": "Get comprehensive analytics overview for a student including overall percentage, total classes, and subject-wise breakdown"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Student Subject Analytics",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/student/student1@example.com/subject/{{subject_id}}",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "student",
+                                        "student1@example.com",
+                                        "subject",
+                                        "{{subject_id}}"
+                                    ]
+                                },
+                                "description": "Get detailed analytics for a specific student in a specific subject"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Student Trends (30 days)",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/student/student1@example.com/trends?days=30",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "student",
+                                        "student1@example.com",
+                                        "trends"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "days",
+                                            "value": "30"
+                                        }
+                                    ]
+                                },
+                                "description": "Get attendance trends for a student over the last N days (default: 30)"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Teacher Analytics",
+                    "item": [
+                        {
+                            "name": "Get Subject Summary",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{teacher_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/teacher/subject/{{subject_id}}/summary?threshold=75",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "teacher",
+                                        "subject",
+                                        "{{subject_id}}",
+                                        "summary"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "threshold",
+                                            "value": "75"
+                                        }
+                                    ]
+                                },
+                                "description": "Get comprehensive subject analytics including total students, classes, average attendance, distribution, and defaulters"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Defaulters List",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{teacher_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/teacher/subject/{{subject_id}}/defaulters?threshold=75",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "teacher",
+                                        "subject",
+                                        "{{subject_id}}",
+                                        "defaulters"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "threshold",
+                                            "value": "75"
+                                        }
+                                    ]
+                                },
+                                "description": "Get list of students with attendance below the specified threshold (default: 75%)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Attendance Distribution",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{teacher_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/teacher/subject/{{subject_id}}/distribution",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "teacher",
+                                        "subject",
+                                        "{{subject_id}}",
+                                        "distribution"
+                                    ]
+                                },
+                                "description": "Get attendance distribution (excellent/good/poor) for a subject"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Subject Analytics",
+                    "item": [
+                        {
+                            "name": "Get Subject Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/subject/{{subject_id}}/stats",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "subject",
+                                        "{{subject_id}}",
+                                        "stats"
+                                    ]
+                                },
+                                "description": "Get subject-level statistics (accessible by all authenticated users)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "Get Subject Trends (30 days)",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/subject/{{subject_id}}/trends?days=30",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "subject",
+                                        "{{subject_id}}",
+                                        "trends"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "days",
+                                            "value": "30"
+                                        }
+                                    ]
+                                },
+                                "description": "Get subject attendance trends over time (accessible by all authenticated users)"
+                            },
+                            "response": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "Security Tests",
             "item": [
                 {

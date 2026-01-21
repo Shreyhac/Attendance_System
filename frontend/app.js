@@ -440,3 +440,367 @@ function formatDate(dateString) {
         day: 'numeric'
     });
 }
+
+// ==================== ANALYTICS FUNCTIONS ====================
+
+// Navigation Functions
+function showStudentDashboard() {
+    showPage('student-dashboard');
+    loadStudentAttendance();
+}
+
+function showTeacherDashboard() {
+    showPage('teacher-dashboard');
+    loadTeacherSubjects();
+}
+
+function showStudentAnalytics() {
+    showPage('student-analytics');
+    document.getElementById('student-analytics-name').textContent = currentUser.name;
+    loadStudentAnalyticsData();
+}
+
+function showTeacherAnalytics() {
+    showPage('teacher-analytics');
+    document.getElementById('teacher-analytics-name').textContent = currentUser.name;
+    loadTeacherSubjectsForAnalytics();
+}
+
+// Student Analytics Functions
+let studentTrendChart = null;
+
+async function loadStudentAnalyticsData() {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/analytics/student/${encodeURIComponent(currentUser.email)}/overview`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            displayStudentAnalytics(data);
+            loadStudentTrends();
+        } else {
+            console.error('Failed to load student analytics');
+        }
+    } catch (error) {
+        console.error('Error loading student analytics:', error);
+    }
+}
+
+function displayStudentAnalytics(data) {
+    // Update stats cards
+    document.getElementById('analytics-overall-percentage').textContent = 
+        `${data.overallPercentage.toFixed(1)}%`;
+    document.getElementById('analytics-total-classes').textContent = data.totalClasses;
+    document.getElementById('analytics-attended-classes').textContent = data.attendedClasses;
+
+    // Display subject-wise performance
+    const subjectGrid = document.getElementById('subject-performance-grid');
+    
+    if (!data.subjectWiseAttendance || data.subjectWiseAttendance.length === 0) {
+        subjectGrid.innerHTML = '<div class="empty-state">No subject data available</div>';
+        return;
+    }
+
+    subjectGrid.innerHTML = data.subjectWiseAttendance.map(subject => `
+        <div class="subject-performance-card">
+            <div class="subject-header">
+                <div class="subject-title">${subject.subjectName}</div>
+                <div class="subject-percentage">${subject.percentage.toFixed(1)}%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${subject.percentage}%"></div>
+            </div>
+            <div class="subject-stats">
+                <div class="subject-stat">
+                    <div class="subject-stat-label">Total</div>
+                    <div class="subject-stat-value">${subject.totalClasses}</div>
+                </div>
+                <div class="subject-stat">
+                    <div class="subject-stat-label">Attended</div>
+                    <div class="subject-stat-value">${subject.attendedClasses}</div>
+                </div>
+                <div class="subject-stat">
+                    <div class="subject-stat-label">Missed</div>
+                    <div class="subject-stat-value">${subject.totalClasses - subject.attendedClasses}</div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function loadStudentTrends() {
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/analytics/student/${encodeURIComponent(currentUser.email)}/trends?days=30`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }
+        );
+
+        if (response.ok) {
+            const trends = await response.json();
+            renderStudentTrendChart(trends);
+        }
+    } catch (error) {
+        console.error('Error loading student trends:', error);
+    }
+}
+
+function renderStudentTrendChart(trends) {
+    const ctx = document.getElementById('studentTrendChart');
+    
+    if (!ctx) return;
+
+    // Destroy existing chart if it exists
+    if (studentTrendChart) {
+        studentTrendChart.destroy();
+    }
+
+    // Sort trends by date
+    trends.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    const labels = trends.map(t => formatDate(t.date));
+    const data = trends.map(t => t.attendancePercentage);
+
+    studentTrendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Attendance %',
+                data: data,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#667eea',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#334155',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `Attendance: ${context.parsed.y.toFixed(1)}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#94a3b8',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: '#334155'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#94a3b8',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        color: '#334155'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Teacher Analytics Functions
+let distributionChart = null;
+
+async function loadTeacherSubjectsForAnalytics() {
+    const select = document.getElementById('analytics-subject-select');
+    select.innerHTML = '<option value="">Loading subjects...</option>';
+
+    try {
+        // Fetch all subjects (public endpoint)
+        const response = await fetch(`${API_BASE_URL}/subjects/all`);
+        
+        if (response.ok) {
+            const subjects = await response.json();
+            
+            // Filter subjects by current teacher's email
+            const teacherSubjects = subjects.filter(subject => 
+                subject.teacherEmail === currentUser.email
+            );
+            
+            select.innerHTML = '<option value="">Choose a subject...</option>';
+            
+            if (teacherSubjects.length === 0) {
+                select.innerHTML += '<option value="" disabled>No subjects found - Create subjects in dashboard</option>';
+            } else {
+                teacherSubjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.id;
+                    option.textContent = subject.name;
+                    select.appendChild(option);
+                });
+            }
+        } else {
+            select.innerHTML = '<option value="">Error loading subjects</option>';
+        }
+    } catch (error) {
+        console.error('Error loading teacher subjects:', error);
+        select.innerHTML = '<option value="">Error loading subjects</option>';
+    }
+}
+
+async function loadTeacherAnalytics() {
+    const subjectId = document.getElementById('analytics-subject-select').value;
+    
+    if (!subjectId) {
+        document.getElementById('teacher-analytics-content').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('teacher-analytics-content').style.display = 'block';
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/analytics/teacher/subject/${subjectId}/summary?threshold=75`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            }
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            displayTeacherAnalytics(data);
+        }
+    } catch (error) {
+        console.error('Error loading teacher analytics:', error);
+    }
+}
+
+function displayTeacherAnalytics(data) {
+    // Update stats
+    document.getElementById('teacher-total-students').textContent = data.totalStudents;
+    document.getElementById('teacher-total-classes').textContent = data.totalClasses;
+    document.getElementById('teacher-avg-attendance').textContent = 
+        `${data.averageAttendance.toFixed(1)}%`;
+
+    // Render distribution chart
+    renderDistributionChart(data.distribution);
+
+    // Display defaulters
+    displayDefaulters(data.defaulters);
+}
+
+function renderDistributionChart(distribution) {
+    const ctx = document.getElementById('distributionChart');
+    
+    if (!ctx) return;
+
+    // Destroy existing chart
+    if (distributionChart) {
+        distributionChart.destroy();
+    }
+
+    distributionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Excellent (75-100%)', 'Good (50-75%)', 'Poor (0-50%)'],
+            datasets: [{
+                data: [distribution.excellent, distribution.good, distribution.poor],
+                backgroundColor: [
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444'
+                ],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleColor: '#f1f5f9',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#334155',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${value} students`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function displayDefaulters(defaulters) {
+    const container = document.getElementById('defaulters-list');
+    
+    if (!defaulters || defaulters.length === 0) {
+        container.innerHTML = `
+            <div class="no-defaulters">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke-width="2"/>
+                </svg>
+                <h3>Great! No students below 75% attendance</h3>
+                <p>All students are maintaining good attendance</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = defaulters.map(student => `
+        <div class="defaulter-card">
+            <div class="defaulter-info">
+                <h4>${student.studentName}</h4>
+                <p>${student.studentEmail}</p>
+            </div>
+            <div class="defaulter-stats">
+                <div class="defaulter-percentage">${student.attendancePercentage.toFixed(1)}%</div>
+                <div class="defaulter-attendance">${student.attendedClasses}/${student.totalClasses} classes</div>
+            </div>
+        </div>
+    `).join('');
+}

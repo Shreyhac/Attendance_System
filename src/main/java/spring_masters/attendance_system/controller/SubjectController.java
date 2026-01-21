@@ -16,6 +16,11 @@ public class SubjectController {
         this.subjectRepository = subjectRepository;
     }
 
+    @GetMapping("/all")
+    public java.util.List<Subject> getAllSubjects() {
+        return subjectRepository.findAll();
+    }
+
     @GetMapping("/{id}")
     public Optional<Subject> getSubjectById(@PathVariable String id) {
         return subjectRepository.findById(id);

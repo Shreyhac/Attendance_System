@@ -3,6 +3,7 @@ package spring_masters.attendance_system.config.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -11,6 +12,7 @@ import spring_masters.attendance_system.security.JwtAuthFilter;
 import spring_masters.attendance_system.security.RateLimitFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -31,6 +33,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/subjects/**").permitAll()
                         .requestMatchers(request -> "OPTIONS".equals(request.getMethod())).permitAll()
+                        .requestMatchers("/api/analytics/**").authenticated() // Analytics FIRST - uses method-level
+                                                                              // security
+                        .requestMatchers("/api/email/**").hasRole("TEACHER")
                         .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         .anyRequest().authenticated())
