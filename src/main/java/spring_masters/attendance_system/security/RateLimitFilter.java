@@ -7,9 +7,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import spring_masters.attendance_system.exception.RateLimitExceededException;
 import spring_masters.attendance_system.service.RateLimitService;
 import spring_masters.attendance_system.util.JwtUtil;
 
@@ -46,16 +46,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
             response.addHeader("X-Rate-Limit-Remaining", String.valueOf(probe.getRemainingTokens()));
             filterChain.doFilter(request, response);
         } else {
-            // Rate limit exceeded
+            // Rate limit exceeded - throw exception to be handled by GlobalExceptionHandler
             long waitForRefill = probe.getNanosToWaitForRefill() / 1_000_000_000;
-
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.setContentType("application/json");
-            response.getWriter().write(String.format(
-                    "{\"error\": \"Rate limit exceeded\", " +
-                            "\"message\": \"Too many requests. Please try again in %d seconds.\", " +
-                            "\"retryAfter\": %d}",
-                    waitForRefill, waitForRefill));
+            throw new RateLimitExceededException(
+                    String.format("Too many requests. Please try again in %d seconds.", waitForRefill),
+                    waitForRefill);
         }
     }
 

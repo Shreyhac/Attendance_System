@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import spring_masters.attendance_system.exception.EmailServiceException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +42,7 @@ public class EmailService {
             System.out.println("Low attendance alert sent to: " + studentEmail);
         } catch (MessagingException e) {
             System.err.println("Failed to send email to " + studentEmail + ": " + e.getMessage());
-            // In production, you might want to log this or throw a custom exception
+            throw new EmailServiceException("Failed to send low attendance alert email", e);
         }
     }
 
@@ -64,6 +65,7 @@ public class EmailService {
             System.out.println("Attendance marked notification sent to: " + studentEmail);
         } catch (MessagingException e) {
             System.err.println("Failed to send email to " + studentEmail + ": " + e.getMessage());
+            throw new EmailServiceException("Failed to send attendance marked notification email", e);
         }
     }
 

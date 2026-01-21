@@ -1,5 +1,6 @@
 package spring_masters.attendance_system.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import spring_masters.attendance_system.dto.CreateSubjectRequest;
 import spring_masters.attendance_system.dto.MarkAttendanceRequest;
@@ -18,12 +19,12 @@ public class TeacherController {
     }
 
     @PostMapping("/subject")
-    public Subject createSubject(@RequestBody CreateSubjectRequest request) {
+    public Subject createSubject(@Valid @RequestBody CreateSubjectRequest request) {
         return teacherService.createSubject(request);
     }
 
     @PostMapping("/attendance")
-    public Attendance markAttendance(@RequestBody MarkAttendanceRequest request) {
+    public Attendance markAttendance(@Valid @RequestBody MarkAttendanceRequest request) {
         return teacherService.markAttendance(request);
     }
 }

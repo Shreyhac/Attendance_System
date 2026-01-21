@@ -3,6 +3,7 @@ package spring_masters.attendance_system.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import spring_masters.attendance_system.dto.response.*;
+import spring_masters.attendance_system.exception.ResourceNotFoundException;
 import spring_masters.attendance_system.model.entity.Attendance;
 import spring_masters.attendance_system.model.entity.Subject;
 import spring_masters.attendance_system.model.entity.User;
@@ -31,7 +32,7 @@ public class AnalyticsService {
      */
     public StudentAnalyticsResponse getStudentOverview(String studentEmail) {
         User student = userRepository.findByEmail(studentEmail)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student", "email", studentEmail));
 
         List<Attendance> allAttendance = attendanceRepository.findByStudentEmail(studentEmail);
 
@@ -74,7 +75,7 @@ public class AnalyticsService {
      */
     public SubjectWiseAttendance getStudentSubjectAnalytics(String studentEmail, String subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Subject", "id", subjectId));
 
         List<Attendance> attendance = attendanceRepository.findByStudentEmailAndSubjectId(studentEmail, subjectId);
 

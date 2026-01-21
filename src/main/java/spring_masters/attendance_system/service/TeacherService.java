@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import spring_masters.attendance_system.dto.CreateSubjectRequest;
 import spring_masters.attendance_system.dto.MarkAttendanceRequest;
+import spring_masters.attendance_system.exception.ResourceNotFoundException;
 import spring_masters.attendance_system.model.entity.Attendance;
 import spring_masters.attendance_system.model.entity.Subject;
 import spring_masters.attendance_system.model.entity.User;
@@ -60,9 +61,10 @@ public class TeacherService {
         if (currentPercentage < attendanceThreshold) {
             try {
                 User student = userRepository.findByEmail(request.getStudentEmail())
-                        .orElseThrow(() -> new RuntimeException("Student not found"));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Student", "email", request.getStudentEmail()));
                 Subject subject = subjectRepository.findById(request.getSubjectId())
-                        .orElseThrow(() -> new RuntimeException("Subject not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Subject", "id", request.getSubjectId()));
 
                 emailService.sendLowAttendanceAlert(
                         student.getEmail(),

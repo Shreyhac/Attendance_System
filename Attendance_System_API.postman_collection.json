@@ -922,6 +922,625 @@
             ]
         },
         {
+            "name": "Exception Handling Tests",
+            "description": "Test cases for all exception scenarios - validation, authentication, authorization, resource not found, duplicates",
+            "item": [
+                {
+                    "name": "Validation Errors (400)",
+                    "item": [
+                        {
+                            "name": "❌ Register with Invalid Email",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 400 Bad Request\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Response has validation error structure\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('status', 400);",
+                                            "    pm.expect(jsonData).to.have.property('error', 'Validation Failed');",
+                                            "    pm.expect(jsonData).to.have.property('fieldErrors');",
+                                            "    pm.expect(jsonData.fieldErrors).to.be.an('array');",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Email field error present\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    var emailError = jsonData.fieldErrors.find(e => e.field === 'email');",
+                                            "    pm.expect(emailError).to.exist;",
+                                            "    pm.expect(emailError.message).to.include('valid email');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"invalid-email-format\",\n  \"password\": \"password123\",\n  \"role\": \"STUDENT\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/auth/register",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                },
+                                "description": "Test validation error for invalid email format - should return 400 with field-level errors"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Register with Short Password",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 400 Bad Request\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Password field error present\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    var passwordError = jsonData.fieldErrors.find(e => e.field === 'password');",
+                                            "    pm.expect(passwordError).to.exist;",
+                                            "    pm.expect(passwordError.message).to.include('6 characters');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"password\": \"123\",\n  \"role\": \"STUDENT\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/auth/register",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                },
+                                "description": "Test validation error for password too short - should return 400"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Register with Missing Fields",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 400 Bad Request\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Multiple field errors present\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData.fieldErrors.length).to.be.at.least(2);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"password\": \"\",\n  \"role\": null\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/auth/register",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                },
+                                "description": "Test validation errors for all required fields missing - should return 400 with multiple field errors"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Create Subject with Invalid Email",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{teacher_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"Physics\",\n  \"teacherEmail\": \"not-an-email\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/teacher/subject",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "teacher",
+                                        "subject"
+                                    ]
+                                },
+                                "description": "Test validation error for invalid teacher email in subject creation - should return 400"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Authentication Errors (401)",
+                    "item": [
+                        {
+                            "name": "❌ Login with Invalid Email",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 401 Unauthorized\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Response has error structure\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('status', 401);",
+                                            "    pm.expect(jsonData).to.have.property('error', 'Unauthorized');",
+                                            "    pm.expect(jsonData).to.have.property('message');",
+                                            "    pm.expect(jsonData.message).to.include('Invalid email or password');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/auth/login",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "login"
+                                    ]
+                                },
+                                "description": "Test authentication error for non-existent email - should return 401"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Login with Wrong Password",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 401 Unauthorized\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Error message is generic for security\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData.message).to.include('Invalid email or password');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"email\": \"teacher1@example.com\",\n  \"password\": \"wrongpassword123\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/auth/login",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "login"
+                                    ]
+                                },
+                                "description": "Test authentication error for wrong password - should return 401 with generic message"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Access Protected Endpoint Without Token",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 401 Unauthorized\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/student/attendance?email=student1@example.com",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "student",
+                                        "attendance"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "email",
+                                            "value": "student1@example.com"
+                                        }
+                                    ]
+                                },
+                                "description": "Test accessing protected endpoint without authentication token - should return 401"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Authorization Errors (403)",
+                    "item": [
+                        {
+                            "name": "❌ Student Tries to Create Subject",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 403 Forbidden\", function () {",
+                                            "    pm.response.to.have.status(403);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Response has error structure\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('status', 403);",
+                                            "    pm.expect(jsonData).to.have.property('error', 'Forbidden');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"Physics\",\n  \"teacherEmail\": \"teacher1@example.com\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/teacher/subject",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "teacher",
+                                        "subject"
+                                    ]
+                                },
+                                "description": "Test authorization error - student trying to access teacher-only endpoint - should return 403"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Student Tries to Mark Attendance",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 403 Forbidden\", function () {",
+                                            "    pm.response.to.have.status(403);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"studentEmail\": \"student1@example.com\",\n  \"subjectId\": \"{{subject_id}}\",\n  \"present\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/teacher/attendance",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "teacher",
+                                        "attendance"
+                                    ]
+                                },
+                                "description": "Test authorization error - student trying to mark attendance - should return 403"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Duplicate Resource (409)",
+                    "item": [
+                        {
+                            "name": "❌ Register with Existing Email",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 409 Conflict\", function () {",
+                                            "    pm.response.to.have.status(409);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Response has error structure\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('status', 409);",
+                                            "    pm.expect(jsonData).to.have.property('error', 'Conflict');",
+                                            "    pm.expect(jsonData.message).to.include('already exists');",
+                                            "    pm.expect(jsonData.message).to.include('email');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"name\": \"Duplicate User\",\n  \"email\": \"teacher1@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"TEACHER\"\n}"
+                                },
+                                "url": {
+                                    "raw": "http://localhost:8081/api/auth/register",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "register"
+                                    ]
+                                },
+                                "description": "Test duplicate resource error - registering with existing email - should return 409"
+                            },
+                            "response": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Resource Not Found (404)",
+                    "item": [
+                        {
+                            "name": "❌ Get Analytics for Non-existent Student",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 404 Not Found\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Response has error structure\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('status', 404);",
+                                            "    pm.expect(jsonData).to.have.property('error', 'Not Found');",
+                                            "    pm.expect(jsonData.message).to.include('not found');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/student/nonexistent@example.com/overview",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "student",
+                                        "nonexistent@example.com",
+                                        "overview"
+                                    ]
+                                },
+                                "description": "Test resource not found error - getting analytics for non-existent student - should return 404"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "❌ Get Analytics for Non-existent Subject",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test(\"Status is 404 Not Found\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "});",
+                                            "",
+                                            "pm.test(\"Error message mentions subject\", function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData.message).to.include('Subject');",
+                                            "    pm.expect(jsonData.message).to.include('not found');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{student_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "http://localhost:8081/api/analytics/student/student1@example.com/subject/nonexistent-subject-id",
+                                    "protocol": "http",
+                                    "host": [
+                                        "localhost"
+                                    ],
+                                    "port": "8081",
+                                    "path": [
+                                        "api",
+                                        "analytics",
+                                        "student",
+                                        "student1@example.com",
+                                        "subject",
+                                        "nonexistent-subject-id"
+                                    ]
+                                },
+                                "description": "Test resource not found error - getting analytics for non-existent subject - should return 404"
+                            },
+                            "response": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "name": "Security Tests",
             "item": [
                 {

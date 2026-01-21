@@ -1,5 +1,6 @@
 package spring_masters.attendance_system.controller.auth;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import spring_masters.attendance_system.dto.request.LoginRequest;
 import spring_masters.attendance_system.dto.request.RegisterRequest;
@@ -16,12 +17,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody RegisterRequest request) {
+    public String register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
+    public String login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
     }
 }
