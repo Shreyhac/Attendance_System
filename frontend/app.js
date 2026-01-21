@@ -98,8 +98,8 @@ async function handleRegister(event) {
                 showLogin();
             }, 1500);
         } else {
-            const error = await response.text();
-            showMessage('register-error', error || 'Registration failed');
+            const errorData = await handleResponseError(response);
+            showMessage('register-error', errorData.message || 'Registration failed');
         }
     } catch (error) {
         showMessage('register-error', 'Network error. Please check if the server is running.');
@@ -145,7 +145,8 @@ async function handleLogin(event) {
             // Show appropriate dashboard
             showDashboard(currentUser.role);
         } else {
-            showMessage('login-error', 'Invalid email or password');
+            const errorData = await handleResponseError(response);
+            showMessage('login-error', errorData.message || 'Invalid email or password');
         }
     } catch (error) {
         showMessage('login-error', 'Network error. Please check if the server is running.');
@@ -208,9 +209,9 @@ async function handleCreateSubject(event) {
             option.textContent = subject.name;
             document.getElementById('subject-select').appendChild(option);
         } else {
-            const errorText = await response.text();
-            console.error('Error response:', errorText);
-            showMessage('subject-error', `Error ${response.status}: ${errorText || 'Failed to create subject'}`);
+            const errorData = await handleResponseError(response);
+            console.error('Error response:', errorData);
+            showMessage('subject-error', errorData.message || 'Failed to create subject');
         }
     } catch (error) {
         console.error('Network error details:', error);
@@ -261,8 +262,8 @@ async function handleMarkAttendance(event) {
             showMessage('attendance-success', `Attendance marked as ${status} for ${studentEmail}`);
             document.getElementById('student-email').value = '';
         } else {
-            const error = await response.text();
-            showMessage('attendance-error', error || 'Failed to mark attendance');
+            const errorData = await handleResponseError(response);
+            showMessage('attendance-error', errorData.message || 'Failed to mark attendance');
         }
     } catch (error) {
         showMessage('attendance-error', 'Network error. Please try again.');
@@ -399,6 +400,41 @@ async function loadAttendancePercentage() {
         }
     } catch (error) {
         document.getElementById('attendance-percentage').textContent = '--';
+    }
+}
+
+// Helper to handle API error responses
+async function handleResponseError(response) {
+    try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            
+            // If it's a validation error response with fieldErrors
+            if (data.fieldErrors && data.fieldErrors.length > 0) {
+                const messages = data.fieldErrors.map(err => `${err.field}: ${err.message}`);
+                return {
+                    message: messages.join(' | '),
+                    data: data
+                };
+            }
+            
+            return {
+                message: data.message || data.error || 'Request failed',
+                data: data
+            };
+        } else {
+            const text = await response.text();
+            return {
+                message: text || `Error ${response.status}`,
+                data: null
+            };
+        }
+    } catch (e) {
+        return {
+            message: `Error ${response.status}`,
+            data: null
+        };
     }
 }
 

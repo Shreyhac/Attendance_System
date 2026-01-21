@@ -1,5 +1,6 @@
 package spring_masters.attendance_system.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +23,7 @@ public class EmailController {
      */
     @PostMapping("/send-low-attendance-alert")
     @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<String> sendLowAttendanceAlert(@RequestBody EmailNotificationRequest request) {
+    public ResponseEntity<String> sendLowAttendanceAlert(@Valid @RequestBody EmailNotificationRequest request) {
         try {
             emailService.sendLowAttendanceAlert(
                     request.getStudentEmail(),
