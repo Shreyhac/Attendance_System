@@ -1,5 +1,6 @@
 package spring_masters.attendance_system.service;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import spring_masters.attendance_system.model.entity.Attendance;
 import spring_masters.attendance_system.repository.AttendanceRepository;
@@ -19,6 +20,7 @@ public class StudentService {
         return attendanceRepository.findByStudentEmail(studentEmail);
     }
 
+    @Cacheable(value = "attendancePercentage", key = "#studentEmail")
     public double getAttendancePercentage(String studentEmail) {
         List<Attendance> records = attendanceRepository.findByStudentEmail(studentEmail);
 

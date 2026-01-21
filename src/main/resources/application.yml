@@ -48,9 +48,38 @@ app:
   weather:
     geocoding-url: https://geocoding-api.open-meteo.com/v1/search
     forecast-url: https://api.open-meteo.com/v1/forecast
+  
+  # Cache Configuration
+  cache:
+    enabled: true
+    default-ttl-minutes: 10
+    stats-enabled: true
+
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
+    cache-names:
+      - studentAnalytics
+      - subjectStats
+      - weatherData
+      - subjects
+      - users
+      - attendancePercentage
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,caches
+  metrics:
+    enable:
+      cache: true
 
 logging:
   level:
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
     org.springframework.security: DEBUG
     spring_masters.attendance_system: DEBUG
+    org.springframework.cache: DEBUG

@@ -1,6 +1,7 @@
 package spring_masters.attendance_system.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -22,6 +23,7 @@ public class WeatherService {
         this.restTemplate = new RestTemplate();
     }
 
+    @Cacheable(value = "weatherData", key = "#city.toLowerCase()")
     public WeatherResponseDTO getWeather(String city) {
         try {
             // 1. Get Coordinates from Geocoding API

@@ -1,6 +1,7 @@
 package spring_masters.attendance_system.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import spring_masters.attendance_system.dto.CreateSubjectRequest;
 import spring_masters.attendance_system.dto.MarkAttendanceRequest;
@@ -37,6 +38,7 @@ public class TeacherService {
         this.emailService = emailService;
     }
 
+    @CacheEvict(value = "subjects", allEntries = true)
     public Subject createSubject(CreateSubjectRequest request) {
         Subject subject = new Subject(
                 request.getName(),
@@ -44,6 +46,7 @@ public class TeacherService {
         return subjectRepository.save(subject);
     }
 
+    @CacheEvict(value = { "studentAnalytics", "subjectStats", "attendancePercentage" }, allEntries = true)
     public Attendance markAttendance(MarkAttendanceRequest request) {
         // Save attendance record
         Attendance attendance = new Attendance(
@@ -102,6 +105,7 @@ public class TeacherService {
     /**
      * Process bulk attendance records from CSV upload
      */
+    @CacheEvict(value = { "studentAnalytics", "subjectStats", "attendancePercentage" }, allEntries = true)
     public spring_masters.attendance_system.dto.response.BulkAttendanceUploadResponse processBulkAttendance(
             List<spring_masters.attendance_system.dto.CsvAttendanceRecord> csvRecords) {
 

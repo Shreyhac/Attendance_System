@@ -1,6 +1,7 @@
 package spring_masters.attendance_system.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import spring_masters.attendance_system.dto.response.*;
 import spring_masters.attendance_system.exception.ResourceNotFoundException;
@@ -30,6 +31,7 @@ public class AnalyticsService {
     /**
      * Get comprehensive analytics overview for a student
      */
+    @Cacheable(value = "studentAnalytics", key = "#studentEmail")
     public StudentAnalyticsResponse getStudentOverview(String studentEmail) {
         User student = userRepository.findByEmail(studentEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Student", "email", studentEmail));
@@ -73,6 +75,7 @@ public class AnalyticsService {
     /**
      * Get analytics for a specific student in a specific subject
      */
+    @Cacheable(value = "studentAnalytics", key = "#studentEmail + '_' + #subjectId")
     public SubjectWiseAttendance getStudentSubjectAnalytics(String studentEmail, String subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject", "id", subjectId));
@@ -93,6 +96,7 @@ public class AnalyticsService {
     /**
      * Get attendance trends for a student over the last N days
      */
+    @Cacheable(value = "studentAnalytics", key = "#studentEmail + '_trends_' + #days")
     public List<AttendanceTrendResponse> getStudentTrends(String studentEmail, int days) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(days);
@@ -126,6 +130,7 @@ public class AnalyticsService {
     /**
      * Get comprehensive subject analytics for teachers
      */
+    @Cacheable(value = "subjectStats", key = "#subjectId + '_summary_' + #threshold")
     public SubjectAnalyticsResponse getSubjectSummary(String subjectId, double threshold) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
@@ -167,6 +172,7 @@ public class AnalyticsService {
     /**
      * Get list of students with attendance below threshold
      */
+    @Cacheable(value = "subjectStats", key = "#subjectId + '_defaulters_' + #threshold")
     public List<DefaulterInfo> getDefaultersList(String subjectId, double threshold) {
         List<Attendance> allAttendance = attendanceRepository.findBySubjectId(subjectId);
 
@@ -209,6 +215,7 @@ public class AnalyticsService {
     /**
      * Calculate attendance distribution (excellent/good/poor)
      */
+    @Cacheable(value = "subjectStats", key = "#subjectId + '_distribution'")
     public AttendanceDistribution getAttendanceDistribution(String subjectId) {
         List<Attendance> allAttendance = attendanceRepository.findBySubjectId(subjectId);
 
@@ -250,6 +257,7 @@ public class AnalyticsService {
     /**
      * Get subject-level statistics
      */
+    @Cacheable(value = "subjectStats", key = "#subjectId + '_stats'")
     public Map<String, Object> getSubjectStats(String subjectId) {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
@@ -286,6 +294,7 @@ public class AnalyticsService {
     /**
      * Get subject attendance trends over time
      */
+    @Cacheable(value = "subjectStats", key = "#subjectId + '_trends_' + #days")
     public List<AttendanceTrendResponse> getSubjectTrends(String subjectId, int days) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(days);
