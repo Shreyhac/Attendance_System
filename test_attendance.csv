@@ -1,0 +1,6 @@
+studentEmail,subjectName,present
+student1@example.com,Mathematics,true
+student2@example.com,Mathematics,false
+student3@example.com,Science,true
+student4@example.com,Science,1
+student5@example.com,Physics,yes

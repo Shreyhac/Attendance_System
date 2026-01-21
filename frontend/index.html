@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance System - Modern & Beautiful</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="csv-upload-styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -187,7 +188,7 @@
         <div class="dashboard-container">
             <div class="dashboard-grid">
                 <!-- Create Subject Card -->
-                <div class="dashboard-card">
+                <div class="dashboard-card full-width">
                     <div class="card-header">
                         <h3>Create Subject</h3>
                         <div class="card-icon">
@@ -211,7 +212,7 @@
                 </div>
                 
                 <!-- Mark Attendance Card -->
-                <div class="dashboard-card">
+                <div class="dashboard-card full-width">
                     <div class="card-header">
                         <h3>Mark Attendance</h3>
                         <div class="card-icon">
@@ -253,6 +254,86 @@
                             <div class="spinner" id="attendance-spinner"></div>
                         </button>
                     </form>
+                </div>
+                
+                <!-- Bulk Upload CSV Card -->
+                <div class="dashboard-card full-width">
+                    <div class="card-header">
+                        <h3>📤 Bulk Upload Attendance (CSV)</h3>
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M7 18C7 19.1046 7.89543 20 9 20H15C16.1046 20 17 19.1046 17 18V9H7V18ZM9 11H15V18H9V11ZM15.5 4L14.5 3H9.5L8.5 4H5V6H19V4H15.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M12 7V13M9 10L12 13L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <div class="csv-upload-instructions">
+                        <p><strong>CSV Format:</strong> studentEmail, subjectName, present</p>
+                        <p style="font-size: 0.875rem; color: #94a3b8; margin-top: 0.5rem;">
+                            Upload a CSV file with student emails, subject names, and attendance status (true/false, 1/0, yes/no, present/absent)
+                        </p>
+                        <button class="btn btn-ghost btn-sm" onclick="downloadCsvTemplate()" style="margin-top: 0.75rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15M17 10L12 15M12 15L7 10M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Download Template
+                        </button>
+                    </div>
+                    
+                    <form id="csv-upload-form" onsubmit="handleCsvUpload(event)">
+                        <div class="csv-file-input-wrapper">
+                            <input type="file" id="csv-file-input" accept=".csv" onchange="handleFileSelect(event)" style="display: none;">
+                            <button type="button" class="btn btn-secondary" onclick="triggerFileInput()">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M7 18C7 19.1046 7.89543 20 9 20H15C16.1046 20 17 19.1046 17 18V9H7V18Z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 7V13M9 10L12 7L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                Choose CSV File
+                            </button>
+                            <span id="csv-file-name" style="margin-left: 1rem; color: #94a3b8;">No file chosen</span>
+                        </div>
+                        
+                        <div id="csv-upload-error" class="error-message"></div>
+                        <div id="csv-upload-success" class="success-message"></div>
+                        
+                        <button type="submit" id="csv-upload-btn" class="btn btn-primary" style="margin-top: 1rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 16V17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17V16M16 8L12 4M12 4L8 8M12 4V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span>Upload & Process</span>
+                        </button>
+                    </form>
+                    
+                    <!-- Upload Results -->
+                    <div id="csv-upload-results" style="display: none; margin-top: 2rem;">
+                        <div class="csv-results-summary">
+                            <h4>Upload Results</h4>
+                            <div class="csv-stats-grid">
+                                <div class="csv-stat">
+                                    <span class="csv-stat-label">Total Records:</span>
+                                    <span class="csv-stat-value" id="csv-total-records">0</span>
+                                </div>
+                                <div class="csv-stat success">
+                                    <span class="csv-stat-label">✓ Successful:</span>
+                                    <span class="csv-stat-value" id="csv-success-count">0</span>
+                                </div>
+                                <div class="csv-stat error">
+                                    <span class="csv-stat-label">✗ Failed:</span>
+                                    <span class="csv-stat-value" id="csv-failure-count">0</span>
+                                </div>
+                                <div class="csv-stat">
+                                    <span class="csv-stat-label">Processing Time:</span>
+                                    <span class="csv-stat-value"><span id="csv-processing-time">0</span>ms</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="csv-failed-records" style="display: none; margin-top: 1.5rem;">
+                            <h4 style="color: #ef4444; margin-bottom: 1rem;">Failed Records</h4>
+                            <div id="csv-failed-records-table"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -13,6 +13,7 @@ import spring_masters.attendance_system.repository.SubjectRepository;
 import spring_masters.attendance_system.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -96,5 +97,91 @@ public class TeacherService {
                 .count();
 
         return (presentCount * 100.0) / records.size();
+    }
+
+    /**
+     * Process bulk attendance records from CSV upload
+     */
+    public spring_masters.attendance_system.dto.response.BulkAttendanceUploadResponse processBulkAttendance(
+            List<spring_masters.attendance_system.dto.CsvAttendanceRecord> csvRecords) {
+
+        long startTime = System.currentTimeMillis();
+
+        List<Attendance> successfulRecords = new ArrayList<>();
+        List<spring_masters.attendance_system.dto.response.AttendanceUploadError> failedRecords = new ArrayList<>();
+
+        for (spring_masters.attendance_system.dto.CsvAttendanceRecord csvRecord : csvRecords) {
+            try {
+                // Find subject by name
+                Subject subject = subjectRepository.findByName(csvRecord.getSubjectName());
+                if (subject == null) {
+                    failedRecords.add(new spring_masters.attendance_system.dto.response.AttendanceUploadError(
+                            csvRecord.getRowNumber(),
+                            csvRecord.getStudentEmail(),
+                            csvRecord.getSubjectName(),
+                            "Subject not found: " + csvRecord.getSubjectName(),
+                            "SUBJECT_NOT_FOUND"));
+                    continue;
+                }
+
+                // Verify student exists
+                User student = userRepository.findByEmail(csvRecord.getStudentEmail()).orElse(null);
+                if (student == null) {
+                    failedRecords.add(new spring_masters.attendance_system.dto.response.AttendanceUploadError(
+                            csvRecord.getRowNumber(),
+                            csvRecord.getStudentEmail(),
+                            csvRecord.getSubjectName(),
+                            "Student not found: " + csvRecord.getStudentEmail(),
+                            "STUDENT_NOT_FOUND"));
+                    continue;
+                }
+
+                // Create attendance record
+                Attendance attendance = new Attendance(
+                        csvRecord.getStudentEmail(),
+                        subject.getId(),
+                        LocalDate.now(),
+                        csvRecord.isPresent());
+                Attendance savedAttendance = attendanceRepository.save(attendance);
+                successfulRecords.add(savedAttendance);
+
+                // Calculate current attendance percentage and send alert if needed
+                double currentPercentage = calculateStudentAttendanceForSubject(
+                        csvRecord.getStudentEmail(),
+                        subject.getId());
+
+                if (currentPercentage < attendanceThreshold) {
+                    try {
+                        emailService.sendLowAttendanceAlert(
+                                student.getEmail(),
+                                student.getName(),
+                                subject.getName(),
+                                currentPercentage);
+                    } catch (Exception e) {
+                        System.err.println("Failed to send email notification: " + e.getMessage());
+                    }
+                }
+
+            } catch (Exception e) {
+                failedRecords.add(new spring_masters.attendance_system.dto.response.AttendanceUploadError(
+                        csvRecord.getRowNumber(),
+                        csvRecord.getStudentEmail(),
+                        csvRecord.getSubjectName(),
+                        "Error processing record: " + e.getMessage(),
+                        "PROCESSING_ERROR"));
+            }
+        }
+
+        long processingTime = System.currentTimeMillis() - startTime;
+
+        spring_masters.attendance_system.dto.response.BulkAttendanceUploadResponse response = new spring_masters.attendance_system.dto.response.BulkAttendanceUploadResponse();
+        response.setTotalRecords(csvRecords.size());
+        response.setSuccessCount(successfulRecords.size());
+        response.setFailureCount(failedRecords.size());
+        response.setSuccessfulRecords(successfulRecords);
+        response.setFailedRecords(failedRecords);
+        response.setProcessingTimeMs(processingTime);
+
+        return response;
     }
 }

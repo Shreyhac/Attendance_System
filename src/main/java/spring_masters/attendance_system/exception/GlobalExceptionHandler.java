@@ -17,229 +17,265 @@ import java.util.logging.Logger;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger logger = Logger.getLogger(GlobalExceptionHandler.class.getName());
+        private static final Logger logger = Logger.getLogger(GlobalExceptionHandler.class.getName());
 
-    /**
-     * Handle ResourceNotFoundException - 404 Not Found
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
-            ResourceNotFoundException ex, WebRequest request) {
+        /**
+         * Handle ResourceNotFoundException - 404 Not Found
+         */
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+                        ResourceNotFoundException ex, WebRequest request) {
 
-        logger.warning("Resource not found: " + ex.getMessage());
+                logger.warning("Resource not found: " + ex.getMessage());
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                ex.getMessage(),
-                getPath(request));
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.NOT_FOUND.value(),
+                                "Not Found",
+                                ex.getMessage(),
+                                getPath(request));
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Handle DuplicateResourceException - 409 Conflict
-     */
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(
-            DuplicateResourceException ex, WebRequest request) {
-
-        logger.warning("Duplicate resource: " + ex.getMessage());
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.CONFLICT.value(),
-                "Conflict",
-                ex.getMessage(),
-                getPath(request));
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
-    }
-
-    /**
-     * Handle InvalidCredentialsException - 401 Unauthorized
-     */
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
-            InvalidCredentialsException ex, WebRequest request) {
-
-        logger.warning("Invalid credentials: " + ex.getMessage());
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.value(),
-                "Unauthorized",
-                ex.getMessage(),
-                getPath(request));
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-    }
-
-    /**
-     * Handle UnauthorizedException - 403 Forbidden
-     */
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
-            UnauthorizedException ex, WebRequest request) {
-
-        logger.warning("Unauthorized access: " + ex.getMessage());
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
-                ex.getMessage(),
-                getPath(request));
-
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
-    }
-
-    /**
-     * Handle ValidationException - 400 Bad Request
-     */
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationException(
-            ValidationException ex, WebRequest request) {
-
-        logger.warning("Validation error: " + ex.getMessage());
-
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation Failed",
-                ex.getMessage(),
-                getPath(request));
-
-        if (ex.getErrors() != null) {
-            ex.getErrors().forEach((field, message) -> errorResponse.addFieldError(field, null, message));
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
+        /**
+         * Handle DuplicateResourceException - 409 Conflict
+         */
+        @ExceptionHandler(DuplicateResourceException.class)
+        public ResponseEntity<ErrorResponse> handleDuplicateResourceException(
+                        DuplicateResourceException ex, WebRequest request) {
 
-    /**
-     * Handle MethodArgumentNotValidException - 400 Bad Request
-     * Triggered by @Valid annotation on request bodies
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, WebRequest request) {
+                logger.warning("Duplicate resource: " + ex.getMessage());
 
-        logger.warning("Validation failed for request body");
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.CONFLICT.value(),
+                                "Conflict",
+                                ex.getMessage(),
+                                getPath(request));
 
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse(
-                HttpStatus.BAD_REQUEST.value(),
-                "Validation Failed",
-                "Input validation failed",
-                getPath(request));
-
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-            errorResponse.addFieldError(
-                    error.getField(),
-                    error.getRejectedValue(),
-                    error.getDefaultMessage());
+                return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
         }
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-    }
+        /**
+         * Handle InvalidCredentialsException - 401 Unauthorized
+         */
+        @ExceptionHandler(InvalidCredentialsException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(
+                        InvalidCredentialsException ex, WebRequest request) {
 
-    /**
-     * Handle RateLimitExceededException - 429 Too Many Requests
-     */
-    @ExceptionHandler(RateLimitExceededException.class)
-    public ResponseEntity<ErrorResponse> handleRateLimitExceededException(
-            RateLimitExceededException ex, WebRequest request) {
+                logger.warning("Invalid credentials: " + ex.getMessage());
 
-        logger.warning("Rate limit exceeded: " + ex.getMessage());
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.UNAUTHORIZED.value(),
+                                "Unauthorized",
+                                ex.getMessage(),
+                                getPath(request));
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.TOO_MANY_REQUESTS.value(),
-                "Too Many Requests",
-                ex.getMessage(),
-                getPath(request));
-
-        return ResponseEntity
-                .status(HttpStatus.TOO_MANY_REQUESTS)
-                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
-                .body(errorResponse);
-    }
-
-    /**
-     * Handle EmailServiceException - 500 Internal Server Error
-     */
-    @ExceptionHandler(EmailServiceException.class)
-    public ResponseEntity<ErrorResponse> handleEmailServiceException(
-            EmailServiceException ex, WebRequest request) {
-
-        logger.severe("Email service error: " + ex.getMessage());
-        if (ex.getCause() != null) {
-            logger.severe("Cause: " + ex.getCause().getMessage());
+                return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                "Failed to send email notification",
-                getPath(request));
+        /**
+         * Handle UnauthorizedException - 403 Forbidden
+         */
+        @ExceptionHandler(UnauthorizedException.class)
+        public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+                        UnauthorizedException ex, WebRequest request) {
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+                logger.warning("Unauthorized access: " + ex.getMessage());
 
-    /**
-     * Handle Spring Security AccessDeniedException - 403 Forbidden
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDeniedException(
-            AccessDeniedException ex, WebRequest request) {
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.FORBIDDEN.value(),
+                                "Forbidden",
+                                ex.getMessage(),
+                                getPath(request));
 
-        logger.warning("Access denied: " + ex.getMessage());
+                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        }
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
-                "You do not have permission to access this resource",
-                getPath(request));
+        /**
+         * Handle ValidationException - 400 Bad Request
+         */
+        @ExceptionHandler(ValidationException.class)
+        public ResponseEntity<ValidationErrorResponse> handleValidationException(
+                        ValidationException ex, WebRequest request) {
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
-    }
+                logger.warning("Validation error: " + ex.getMessage());
 
-    /**
-     * Handle Spring Security AuthenticationException - 401 Unauthorized
-     */
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(
-            AuthenticationException ex, WebRequest request) {
+                ValidationErrorResponse errorResponse = new ValidationErrorResponse(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Validation Failed",
+                                ex.getMessage(),
+                                getPath(request));
 
-        logger.warning("Authentication failed: " + ex.getMessage());
+                if (ex.getErrors() != null) {
+                        ex.getErrors().forEach((field, message) -> errorResponse.addFieldError(field, null, message));
+                }
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.UNAUTHORIZED.value(),
-                "Unauthorized",
-                "Authentication failed. Please provide valid credentials.",
-                getPath(request));
+                return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-    }
+        /**
+         * Handle MethodArgumentNotValidException - 400 Bad Request
+         * Triggered by @Valid annotation on request bodies
+         */
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ValidationErrorResponse> handleMethodArgumentNotValid(
+                        MethodArgumentNotValidException ex, WebRequest request) {
 
-    /**
-     * Handle generic exceptions - 500 Internal Server Error
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex, WebRequest request) {
+                logger.warning("Validation failed for request body");
 
-        logger.severe("Unexpected error: " + ex.getMessage());
-        ex.printStackTrace();
+                ValidationErrorResponse errorResponse = new ValidationErrorResponse(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Validation Failed",
+                                "Input validation failed",
+                                getPath(request));
 
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                "An unexpected error occurred. Please try again later.",
-                getPath(request));
+                for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+                        errorResponse.addFieldError(
+                                        error.getField(),
+                                        error.getRejectedValue(),
+                                        error.getDefaultMessage());
+                }
 
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+                return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
 
-    /**
-     * Extract request path from WebRequest
-     */
-    private String getPath(WebRequest request) {
-        return request.getDescription(false).replace("uri=", "");
-    }
+        /**
+         * Handle RateLimitExceededException - 429 Too Many Requests
+         */
+        @ExceptionHandler(RateLimitExceededException.class)
+        public ResponseEntity<ErrorResponse> handleRateLimitExceededException(
+                        RateLimitExceededException ex, WebRequest request) {
+
+                logger.warning("Rate limit exceeded: " + ex.getMessage());
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.TOO_MANY_REQUESTS.value(),
+                                "Too Many Requests",
+                                ex.getMessage(),
+                                getPath(request));
+
+                return ResponseEntity
+                                .status(HttpStatus.TOO_MANY_REQUESTS)
+                                .header("Retry-After", String.valueOf(ex.getRetryAfterSeconds()))
+                                .body(errorResponse);
+        }
+
+        /**
+         * Handle EmailServiceException - 500 Internal Server Error
+         */
+        @ExceptionHandler(EmailServiceException.class)
+        public ResponseEntity<ErrorResponse> handleEmailServiceException(
+                        EmailServiceException ex, WebRequest request) {
+
+                logger.severe("Email service error: " + ex.getMessage());
+                if (ex.getCause() != null) {
+                        logger.severe("Cause: " + ex.getCause().getMessage());
+                }
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "Internal Server Error",
+                                "Failed to send email notification",
+                                getPath(request));
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        /**
+         * Handle CsvParsingException - 400 Bad Request
+         */
+        @ExceptionHandler(CsvParsingException.class)
+        public ResponseEntity<ErrorResponse> handleCsvParsingException(
+                        CsvParsingException ex, WebRequest request) {
+
+                logger.warning("CSV parsing error: " + ex.getMessage());
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                ex.getMessage(),
+                                getPath(request));
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        /**
+         * Handle InvalidFileTypeException - 400 Bad Request
+         */
+        @ExceptionHandler(InvalidFileTypeException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidFileTypeException(
+                        InvalidFileTypeException ex, WebRequest request) {
+
+                logger.warning("Invalid file type: " + ex.getMessage());
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                ex.getMessage(),
+                                getPath(request));
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        /**
+         * Handle Spring Security AccessDeniedException - 403 Forbidden
+         */
+        @ExceptionHandler(AccessDeniedException.class)
+        public ResponseEntity<ErrorResponse> handleAccessDeniedException(
+                        AccessDeniedException ex, WebRequest request) {
+
+                logger.warning("Access denied: " + ex.getMessage());
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.FORBIDDEN.value(),
+                                "Forbidden",
+                                "You do not have permission to access this resource",
+                                getPath(request));
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        }
+
+        /**
+         * Handle Spring Security AuthenticationException - 401 Unauthorized
+         */
+        @ExceptionHandler(AuthenticationException.class)
+        public ResponseEntity<ErrorResponse> handleAuthenticationException(
+                        AuthenticationException ex, WebRequest request) {
+
+                logger.warning("Authentication failed: " + ex.getMessage());
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.UNAUTHORIZED.value(),
+                                "Unauthorized",
+                                "Authentication failed. Please provide valid credentials.",
+                                getPath(request));
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        }
+
+        /**
+         * Handle generic exceptions - 500 Internal Server Error
+         */
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleGenericException(
+                        Exception ex, WebRequest request) {
+
+                logger.severe("Unexpected error: " + ex.getMessage());
+                ex.printStackTrace();
+
+                ErrorResponse errorResponse = new ErrorResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "Internal Server Error",
+                                "An unexpected error occurred. Please try again later.",
+                                getPath(request));
+
+                return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        /**
+         * Extract request path from WebRequest
+         */
+        private String getPath(WebRequest request) {
+                return request.getDescription(false).replace("uri=", "");
+        }
 }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SubjectRepository extends MongoRepository<Subject, String> {
     List<Subject> findByTeacherEmail(String teacherEmail);
+
+    Subject findByName(String name);
 }

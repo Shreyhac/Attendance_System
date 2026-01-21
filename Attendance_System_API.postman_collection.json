@@ -320,6 +320,45 @@
                         "description": "Mark student as absent (requires teacher token)"
                     },
                     "response": []
+                },
+                {
+                    "name": "Bulk Upload Attendance (CSV)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": [],
+                                    "description": "CSV file with columns: studentEmail, subjectName, present"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/upload",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "upload"
+                            ]
+                        },
+                        "description": "Upload a CSV file to mark attendance for multiple students in bulk. CSV format: studentEmail,subjectName,present (supports true/false, 1/0, yes/no, present/absent)"
+                    },
+                    "response": []
                 }
             ]
         },
@@ -327,7 +366,7 @@
             "name": "Student APIs",
             "item": [
                 {
-                    "name": "8. Get Student Attendance",
+                    "name": "9. Get Student Attendance",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -360,7 +399,7 @@
                     "response": []
                 },
                 {
-                    "name": "9. Get Attendance Percentage",
+                    "name": "10. Get Attendance Percentage",
                     "request": {
                         "method": "GET",
                         "header": [

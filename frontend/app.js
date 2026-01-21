@@ -288,6 +288,136 @@ async function handleMarkAttendance(event) {
     }
 }
 
+// CSV Bulk Upload Functions
+async function handleCsvUpload(event) {
+    event.preventDefault();
+    
+    const fileInput = document.getElementById('csv-file-input');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showMessage('csv-upload-error', 'Please select a CSV file');
+        return;
+    }
+    
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        showMessage('csv-upload-error', 'Please select a valid CSV file');
+        return;
+    }
+    
+    // Show upload progress
+    const uploadBtn = document.getElementById('csv-upload-btn');
+    const originalText = uploadBtn.textContent;
+    uploadBtn.textContent = 'Uploading...';
+    uploadBtn.disabled = true;
+    hideMessage('csv-upload-error');
+    hideMessage('csv-upload-success');
+    document.getElementById('csv-upload-results').style.display = 'none';
+    
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(`${API_BASE_URL}/teacher/attendance/upload`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: formData
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            displayCsvUploadResults(result);
+            
+            // Show success message
+            const successMsg = `Successfully processed ${result.successCount} out of ${result.totalRecords} records`;
+            showMessage('csv-upload-success', successMsg);
+            
+            // Clear file input
+            fileInput.value = '';
+        } else {
+            const errorData = await handleResponseError(response);
+            showMessage('csv-upload-error', errorData.message || 'Failed to upload CSV file');
+        }
+    } catch (error) {
+        console.error('CSV upload error:', error);
+        showMessage('csv-upload-error', 'Network error. Please try again.');
+    } finally {
+        uploadBtn.textContent = originalText;
+        uploadBtn.disabled = false;
+    }
+}
+
+function displayCsvUploadResults(result) {
+    const resultsContainer = document.getElementById('csv-upload-results');
+    resultsContainer.style.display = 'block';
+    
+    // Update summary
+    document.getElementById('csv-total-records').textContent = result.totalRecords;
+    document.getElementById('csv-success-count').textContent = result.successCount;
+    document.getElementById('csv-failure-count').textContent = result.failureCount;
+    document.getElementById('csv-processing-time').textContent = result.processingTimeMs;
+    
+    // Display failed records if any
+    const failedRecordsContainer = document.getElementById('csv-failed-records');
+    
+    if (result.failureCount > 0) {
+        failedRecordsContainer.style.display = 'block';
+        
+        const table = `
+            <table class="csv-results-table">
+                <thead>
+                    <tr>
+                        <th>Row</th>
+                        <th>Student Email</th>
+                        <th>Subject Name</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${result.failedRecords.map(record => `
+                        <tr>
+                            <td>${record.rowNumber}</td>
+                            <td>${record.studentEmail}</td>
+                            <td>${record.subjectName}</td>
+                            <td class="error-message">${record.errorMessage}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById('csv-failed-records-table').innerHTML = table;
+    } else {
+        failedRecordsContainer.style.display = 'none';
+    }
+}
+
+function downloadCsvTemplate() {
+    const csvContent = 'studentEmail,subjectName,present\nstudent@example.com,Mathematics,true\nstudent2@example.com,Science,false';
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'attendance_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+function triggerFileInput() {
+    document.getElementById('csv-file-input').click();
+}
+
+function handleFileSelect(event) {
+    const fileInput = event.target;
+    const fileName = fileInput.files[0]?.name || 'No file chosen';
+    document.getElementById('csv-file-name').textContent = fileName;
+}
+
 async function loadTeacherSubjects() {
     const container = document.getElementById('subjects-list');
     container.innerHTML = '<div class="loading-state">Loading subjects...</div>';
