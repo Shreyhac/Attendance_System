@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance System - Modern & Beautiful</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page" class="page active">
+        <div class="landing-container">
+            <div class="landing-content">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                            <rect width="60" height="60" rx="16" fill="url(#gradient1)"/>
+                            <path d="M30 15L45 25V40L30 50L15 40V25L30 15Z" stroke="white" stroke-width="2.5" fill="none"/>
+                            <circle cx="30" cy="30" r="8" fill="white"/>
+                            <defs>
+                                <linearGradient id="gradient1" x1="0" y1="0" x2="60" y2="60">
+                                    <stop offset="0%" stop-color="#667eea"/>
+                                    <stop offset="100%" stop-color="#764ba2"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h1 class="landing-title">Attendance System</h1>
+                    <p class="landing-credit">Project made by Spring Masters (a.k.a ML Masters)</p>
+                </div>
+                
+                <div class="auth-buttons">
+                    <button class="btn btn-primary" onclick="showLogin()">
+                        <span>Sign In</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10H16M16 10L12 6M16 10L12 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-secondary" onclick="showRegister()">
+                        <span>Create Account</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="landing-decoration">
+                <div class="floating-card card-1"></div>
+                <div class="floating-card card-2"></div>
+                <div class="floating-card card-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login-page" class="page">
+        <div class="auth-container">
+            <button class="back-btn" onclick="showLanding()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16 10H4M4 10L8 6M4 10L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Back
+            </button>
+            
+            <div class="auth-card">
+                <h2 class="auth-title">Welcome Back</h2>
+                <p class="auth-subtitle">Sign in to your account</p>
+                
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" required placeholder="you@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    
+                    <div id="login-error" class="error-message"></div>
+                    
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span>Sign In</span>
+                        <div class="spinner" id="login-spinner"></div>
+                    </button>
+                </form>
+                
+                <p class="auth-footer">
+                    Don't have an account? 
+                    <a href="#" onclick="showRegister(); return false;">Sign up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="register-page" class="page">
+        <div class="auth-container">
+            <button class="back-btn" onclick="showLanding()">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16 10H4M4 10L8 6M4 10L8 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Back
+            </button>
+            
+            <div class="auth-card">
+                <h2 class="auth-title">Create Account</h2>
+                <p class="auth-subtitle">Join our attendance system</p>
+                
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" required placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-email">Email Address</label>
+                        <input type="email" id="register-email" required placeholder="you@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required placeholder="••••••••" minlength="6">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="register-role">I am a</label>
+                        <select id="register-role" required>
+                            <option value="">Select role...</option>
+                            <option value="STUDENT">Student</option>
+                            <option value="TEACHER">Teacher</option>
+                        </select>
+                    </div>
+                    
+                    <div id="register-error" class="error-message"></div>
+                    <div id="register-success" class="success-message"></div>
+                    
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span>Create Account</span>
+                        <div class="spinner" id="register-spinner"></div>
+                    </button>
+                </form>
+                
+                <p class="auth-footer">
+                    Already have an account? 
+                    <a href="#" onclick="showLogin(); return false;">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacher-dashboard" class="page">
+        <nav class="navbar">
+            <div class="navbar-content">
+                <div class="navbar-brand">
+                    <div class="logo-small">
+                        <svg width="32" height="32" viewBox="0 0 60 60" fill="none">
+                            <rect width="60" height="60" rx="12" fill="url(#gradient2)"/>
+                            <path d="M30 15L45 25V40L30 50L15 40V25L30 15Z" stroke="white" stroke-width="2.5" fill="none"/>
+                            <defs>
+                                <linearGradient id="gradient2" x1="0" y1="0" x2="60" y2="60">
+                                    <stop offset="0%" stop-color="#667eea"/>
+                                    <stop offset="100%" stop-color="#764ba2"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <span>Teacher Dashboard</span>
+                </div>
+                <div class="navbar-user">
+                    <span id="teacher-name">Teacher</span>
+                    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="dashboard-container">
+            <div class="dashboard-grid">
+                <!-- Create Subject Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Create Subject</h3>
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <form id="create-subject-form" onsubmit="handleCreateSubject(event)">
+                        <div class="form-group">
+                            <label for="subject-name">Subject Name</label>
+                            <input type="text" id="subject-name" required placeholder="e.g., Mathematics">
+                        </div>
+                        <div id="subject-error" class="error-message"></div>
+                        <div id="subject-success" class="success-message"></div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>Create Subject</span>
+                            <div class="spinner" id="subject-spinner"></div>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Mark Attendance Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3>Mark Attendance</h3>
+                        <div class="card-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 11L12 14L22 4M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <form id="mark-attendance-form" onsubmit="handleMarkAttendance(event)">
+                        <div class="form-group">
+                            <label for="student-email">Student Email</label>
+                            <input type="email" id="student-email" required placeholder="student@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="subject-select">Subject</label>
+                            <select id="subject-select" required>
+                                <option value="">Select subject...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="attendance-status" value="true" checked>
+                                    <span class="radio-custom"></span>
+                                    Present
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="attendance-status" value="false">
+                                    <span class="radio-custom"></span>
+                                    Absent
+                                </label>
+                            </div>
+                        </div>
+                        <div id="attendance-error" class="error-message"></div>
+                        <div id="attendance-success" class="success-message"></div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>Mark Attendance</span>
+                            <div class="spinner" id="attendance-spinner"></div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="student-dashboard" class="page">
+        <nav class="navbar">
+            <div class="navbar-content">
+                <div class="navbar-brand">
+                    <div class="logo-small">
+                        <svg width="32" height="32" viewBox="0 0 60 60" fill="none">
+                            <rect width="60" height="60" rx="12" fill="url(#gradient3)"/>
+                            <path d="M30 15L45 25V40L30 50L15 40V25L30 15Z" stroke="white" stroke-width="2.5" fill="none"/>
+                            <defs>
+                                <linearGradient id="gradient3" x1="0" y1="0" x2="60" y2="60">
+                                    <stop offset="0%" stop-color="#667eea"/>
+                                    <stop offset="100%" stop-color="#764ba2"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <span>Student Dashboard</span>
+                </div>
+                <div class="navbar-user">
+                    <span id="student-name">Student</span>
+                    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="dashboard-container">
+            <!-- Attendance Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon present">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">Attendance Rate</p>
+                        <p class="stat-value" id="attendance-percentage">--%</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">Total Records</p>
+                        <p class="stat-value" id="total-records">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Attendance Records -->
+            <div class="dashboard-card full-width">
+                <div class="card-header">
+                    <h3>Attendance Records</h3>
+                    <button class="btn btn-ghost btn-sm" onclick="loadStudentAttendance()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+                <div id="attendance-records" class="attendance-table-container">
+                    <div class="loading-state">Loading attendance records...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=4"></script>
+</body>
+</html>

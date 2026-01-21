@@ -1,0 +1,441 @@
+{
+    "info": {
+        "_postman_id": "attendance-system-api",
+        "name": "Attendance System API",
+        "description": "Complete API collection for testing the Attendance System",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "1. Register Teacher",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Teacher One\",\n  \"email\": \"teacher1@example.com\",\n  \"password\": \"teacher123\",\n  \"role\": \"TEACHER\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new teacher account"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "2. Register Student",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Student One\",\n  \"email\": \"student1@example.com\",\n  \"password\": \"student123\",\n  \"role\": \"STUDENT\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new student account"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "3. Login as Teacher",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Save the JWT token to environment variable",
+                                    "if (pm.response.code === 200) {",
+                                    "    pm.environment.set(\"teacher_token\", pm.response.text().replace(/\"/g, ''));",
+                                    "    console.log(\"Teacher token saved!\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"teacher1@example.com\",\n  \"password\": \"teacher123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login as teacher and get JWT token (automatically saved to environment)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "4. Login as Student",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Save the JWT token to environment variable",
+                                    "if (pm.response.code === 200) {",
+                                    "    pm.environment.set(\"student_token\", pm.response.text().replace(/\"/g, ''));",
+                                    "    console.log(\"Student token saved!\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"student1@example.com\",\n  \"password\": \"student123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login as student and get JWT token (automatically saved to environment)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Teacher APIs",
+            "item": [
+                {
+                    "name": "5. Create Subject",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Save the subject ID to environment variable",
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"subject_id\", jsonData.id);",
+                                    "    console.log(\"Subject ID saved: \" + jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Mathematics\",\n  \"teacherEmail\": \"teacher1@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/subject",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "subject"
+                            ]
+                        },
+                        "description": "Create a new subject (requires teacher token)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "6. Mark Attendance - Present",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentEmail\": \"student1@example.com\",\n  \"subjectId\": \"{{subject_id}}\",\n  \"present\": true\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance"
+                            ]
+                        },
+                        "description": "Mark student as present (requires teacher token)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "7. Mark Attendance - Absent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentEmail\": \"student1@example.com\",\n  \"subjectId\": \"{{subject_id}}\",\n  \"present\": false\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance"
+                            ]
+                        },
+                        "description": "Mark student as absent (requires teacher token)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Student APIs",
+            "item": [
+                {
+                    "name": "8. Get Student Attendance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance?email=student1@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student1@example.com"
+                                }
+                            ]
+                        },
+                        "description": "Get all attendance records for a student (requires student token)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "9. Get Attendance Percentage",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/percentage?email=student1@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "percentage"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student1@example.com"
+                                }
+                            ]
+                        },
+                        "description": "Get attendance percentage for a student (requires student token)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Security Tests",
+            "item": [
+                {
+                    "name": "❌ Student tries to create subject (Should Fail)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Physics\",\n  \"teacherEmail\": \"teacher1@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/subject",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "subject"
+                            ]
+                        },
+                        "description": "Test role-based access - student should NOT be able to create subject (expect 403)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "❌ No token provided (Should Fail)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance?email=student1@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student1@example.com"
+                                }
+                            ]
+                        },
+                        "description": "Test authentication - should fail without token (expect 401)"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8081"
+        }
+    ]
+}
