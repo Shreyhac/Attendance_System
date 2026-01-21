@@ -20,6 +20,8 @@ public class User {
 
     private boolean active;
 
+    private String location = "London";
+
     public User() {
     }
 
@@ -29,6 +31,16 @@ public class User {
         this.password = password;
         this.role = role;
         this.active = active;
+        this.location = "London";
+    }
+
+    public User(String name, String email, String password, Role role, boolean active, String location) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.active = active;
+        this.location = location != null ? location : "London";
     }
 
     public String getId() {
@@ -77,5 +89,13 @@ public class User {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

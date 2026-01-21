@@ -22,6 +22,8 @@ public class RegisterRequest {
     @NotNull(message = "Role is required")
     private Role role;
 
+    private String location;
+
     public String getName() {
         return name;
     }
@@ -36,5 +38,9 @@ public class RegisterRequest {
 
     public Role getRole() {
         return role;
+    }
+
+    public String getLocation() {
+        return location;
     }
 }

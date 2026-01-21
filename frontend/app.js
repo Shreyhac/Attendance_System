@@ -58,10 +58,12 @@ function showDashboard(role) {
         showPage('teacher-dashboard');
         document.getElementById('teacher-name').textContent = currentUser.name;
         loadTeacherSubjects();
+        loadWeather('teacher-weather');
     } else if (role === 'STUDENT') {
         showPage('student-dashboard');
         document.getElementById('student-name').textContent = currentUser.name;
         loadStudentAttendance();
+        loadWeather('student-weather');
     }
 }
 
@@ -138,12 +140,8 @@ async function handleLogin(event) {
                 name: email.split('@')[0] // Simple name extraction
             };
             
-            // Save to localStorage
-            localStorage.setItem('authToken', authToken);
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Show appropriate dashboard
-            showDashboard(currentUser.role);
+            // Fetch full profile (name, location)
+            await fetchUserProfile();
         } else {
             const errorData = await handleResponseError(response);
             showMessage('login-error', errorData.message || 'Invalid email or password');
@@ -152,6 +150,24 @@ async function handleLogin(event) {
         showMessage('login-error', 'Network error. Please check if the server is running.');
     } finally {
         hideSpinner('login-spinner');
+    }
+}
+
+async function fetchUserProfile() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/users/profile`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            currentUser = await response.json();
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showDashboard(currentUser.role);
+        }
+    } catch (error) {
+        console.error('Error fetching profile:', error);
     }
 }
 
@@ -839,4 +855,128 @@ function displayDefaulters(defaulters) {
             </div>
         </div>
     `).join('');
+}
+
+function renderWeather(container, data) {
+    console.log(`Rendering weather for container ${container.id} with data:`, data);
+    console.log(`Current user location state: ${currentUser?.location}`);
+    const code = data.current_weather.weathercode;
+    const temp = Math.round(data.current_weather.temperature);
+    
+    const weatherMap = {
+        0:  { desc: 'Clear sky', icon: '01d' },
+        1:  { desc: 'Mainly clear', icon: '02d' },
+        2:  { desc: 'Partly cloudy', icon: '03d' },
+        3:  { desc: 'Overcast', icon: '04d' },
+        45: { desc: 'Fog', icon: '50d' },
+        48: { desc: 'Depositing rime fog', icon: '50d' },
+        51: { desc: 'Drizzle: Light', icon: '09d' },
+        53: { desc: 'Drizzle: Moderate', icon: '09d' },
+        55: { desc: 'Drizzle: Dense', icon: '09d' },
+        61: { desc: 'Rain: Slight', icon: '10d' },
+        63: { desc: 'Rain: Moderate', icon: '10d' },
+        65: { desc: 'Rain: Heavy', icon: '10d' },
+        71: { desc: 'Snow fall: Slight', icon: '13d' },
+        73: { desc: 'Snow fall: Moderate', icon: '13d' },
+        75: { desc: 'Snow fall: Heavy', icon: '13d' },
+        80: { desc: 'Rain showers: Slight', icon: '09d' },
+        81: { desc: 'Rain showers: Moderate', icon: '09d' },
+        82: { desc: 'Rain showers: Violent', icon: '09d' },
+        95: { desc: 'Thunderstorm', icon: '11d' }
+    };
+
+    const condition = weatherMap[code] || { desc: 'Unknown', icon: '01d' };
+    const iconUrl = `https://openweathermap.org/img/wn/${condition.icon}.png`;
+    
+    container.innerHTML = `
+        <div class="weather-main" onclick="toggleWeatherSearch('${container.id}')" title="Change Location">
+            <img src="${iconUrl}" alt="${condition.desc}" class="weather-icon">
+            <div class="weather-info">
+                <span class="weather-temp">${temp}°C</span>
+                <span class="weather-desc">${data.city || currentUser.location || 'London'}</span>
+            </div>
+        </div>
+        <div class="weather-search" style="display: none;">
+            <input type="text" placeholder="City..." class="weather-input" 
+                   onkeyup="if(event.key === 'Enter') updateWeatherLocation('${container.id}', this.value)">
+            <button class="weather-btn" onclick="const input = this.previousElementSibling; updateWeatherLocation('${container.id}', input.value)">OK</button>
+        </div>
+    `;
+}
+
+function toggleWeatherSearch(containerId) {
+    const container = document.getElementById(containerId);
+    const main = container.querySelector('.weather-main');
+    const search = container.querySelector('.weather-search');
+    
+    if (search.style.display === 'none') {
+        search.style.display = 'flex';
+        main.style.display = 'none';
+        search.querySelector('input').focus();
+    } else {
+        search.style.display = 'none';
+        main.style.display = 'flex';
+    }
+}
+
+async function updateWeatherLocation(containerId, newCity) {
+    if (!newCity || newCity.trim() === '') return;
+    
+    const container = document.getElementById(containerId);
+    container.innerHTML = '<span class="loading-dots">...</span>';
+    
+    console.log(`Updating weather location to: ${newCity}`);
+    try {
+        // 1. Save to backend
+        const saveResponse = await fetch(`${API_BASE_URL}/users/profile/location`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ location: newCity })
+        });
+        
+        if (saveResponse.ok) {
+            const result = await saveResponse.json();
+            currentUser.location = result.location;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            // 2. Fetch new weather with EXPLICIT city to avoid stale state issues
+            await loadWeather(containerId, result.location);
+        } else {
+            console.error('Failed to save location preference');
+            await loadWeather(containerId); // Refresh with old
+        }
+    } catch (error) {
+        console.error('Error updating location:', error);
+        await loadWeather(containerId);
+    }
+}
+
+async function loadWeather(containerId, overrideCity = null) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Show loading state
+    container.innerHTML = '<span class="loading-dots">...</span>';
+
+    try {
+        const city = overrideCity || currentUser?.location || 'London'; 
+        console.log(`[Weather] Fetching for city: "${city}" (override: "${overrideCity}", user: "${currentUser?.location}")`);
+        const response = await fetch(`${API_BASE_URL}/weather?city=${encodeURIComponent(city)}`);
+        
+        if (response.ok) {
+            const data = await response.json();
+            data.city = city; // Add city name for display
+            console.log(`[Weather] Received data for: ${city}`, data);
+            renderWeather(container, data);
+        } else {
+            console.error(`[Weather] API error for ${city}:`, response.status);
+            container.innerHTML = `<span title="Failed to load weather" onclick="loadWeather('${containerId}')">⚠️</span>`;
+        }
+    } catch (error) {
+        console.error('[Weather] Network error:', error);
+        container.innerHTML = `<span title="Weather offline" onclick="loadWeather('${containerId}')">☁️</span>`;
+    }
 }

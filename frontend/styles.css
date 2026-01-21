@@ -1086,3 +1086,74 @@ body {
         max-height: 300px;
     }
 }
+
+/* ==================== WEATHER WIDGET ==================== */
+.weather-widget {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--bg-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--bg-tertiary);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.weather-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.weather-temp {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.weather-desc {
+    font-size: 0.75rem;
+    text-transform: capitalize;
+}
+
+.weather-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.weather-main {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.weather-main:hover {
+    opacity: 0.8;
+}
+
+.weather-search {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.weather-input {
+    width: 80px;
+    padding: 0.25rem;
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+}
+
+.weather-btn {
+    padding: 0.25rem 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+}

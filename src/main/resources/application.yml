@@ -36,6 +36,10 @@ app:
     capacity: 100
     refill-tokens: 100
     refill-duration-minutes: 1
+  # Weather API Configuration (Open-Meteo)
+  weather:
+    geocoding-url: https://geocoding-api.open-meteo.com/v1/search
+    forecast-url: https://api.open-meteo.com/v1/forecast
 
 logging:
   level:

@@ -7,6 +7,38 @@
     },
     "item": [
         {
+            "name": "Weather API",
+            "item": [
+                {
+                    "name": "Get Weather Information",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8081/api/weather?city=London",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "weather"
+                            ],
+                            "query": [
+                                {
+                                    "key": "city",
+                                    "value": "London"
+                                }
+                            ]
+                        },
+                        "description": "Get current weather information from Open-Meteo"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Authentication",
             "item": [
                 {
