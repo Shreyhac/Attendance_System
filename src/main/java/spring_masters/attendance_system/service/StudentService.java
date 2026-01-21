@@ -133,6 +133,7 @@ public class StudentService {
     /**
      * Get total present days for a student
      */
+    @Cacheable(value = "studentAnalytics", key = "#studentEmail + '-present'")
     public long getTotalPresentDays(String studentEmail) {
         return attendanceRepository
                 .findByStudentEmailAndPresent(studentEmail, true)
@@ -142,6 +143,7 @@ public class StudentService {
     /**
      * Get total absent days for a student
      */
+    @Cacheable(value = "studentAnalytics", key = "#studentEmail + '-absent'")
     public long getTotalAbsentDays(String studentEmail) {
         return attendanceRepository
                 .findByStudentEmailAndPresent(studentEmail, false)

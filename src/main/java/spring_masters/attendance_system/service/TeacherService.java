@@ -2,6 +2,7 @@ package spring_masters.attendance_system.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import spring_masters.attendance_system.dto.CreateSubjectRequest;
 import spring_masters.attendance_system.dto.MarkAttendanceRequest;
@@ -327,6 +328,7 @@ public class TeacherService {
     /**
      * Get subjects taught by a teacher
      */
+    @Cacheable(value = "subjects", key = "#teacherEmail")
     public List<Subject> getSubjectsByTeacher(String teacherEmail) {
         return subjectRepository.findByTeacherEmail(teacherEmail);
     }
