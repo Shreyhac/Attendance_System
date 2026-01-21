@@ -29,6 +29,13 @@ app:
   email:
     from: your-email@gmail.com
     attendance-threshold: 75.0
+  
+  # Rate Limiting Configuration
+  rate-limit:
+    enabled: true
+    capacity: 100  # Maximum requests allowed
+    refill-tokens: 100  # Tokens to refill
+    refill-duration-minutes: 1  # Refill period in minutes
 
 logging:
   level:

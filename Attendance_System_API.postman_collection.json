@@ -449,6 +449,199 @@
             ]
         },
         {
+            "name": "Rate Limiting Tests",
+            "item": [
+                {
+                    "name": "Test Rate Limit - Single Request",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Check that rate limit header is present",
+                                    "pm.test(\"Rate limit header present\", function () {",
+                                    "    pm.response.to.have.header(\"X-Rate-Limit-Remaining\");",
+                                    "});",
+                                    "",
+                                    "// Log remaining requests",
+                                    "var remaining = pm.response.headers.get(\"X-Rate-Limit-Remaining\");",
+                                    "console.log(\"Remaining requests: \" + remaining);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/percentage?email=student1@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "percentage"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student1@example.com"
+                                }
+                            ]
+                        },
+                        "description": "Test a single request and verify rate limit headers are present"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Test Rate Limit - Rapid Requests (Run 105 times)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Check if we hit the rate limit",
+                                    "if (pm.response.code === 429) {",
+                                    "    pm.test(\"Rate limit exceeded (429)\", function () {",
+                                    "        pm.response.to.have.status(429);",
+                                    "    });",
+                                    "    ",
+                                    "    pm.test(\"Error message present\", function () {",
+                                    "        var jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData).to.have.property('error');",
+                                    "        pm.expect(jsonData).to.have.property('retryAfter');",
+                                    "    });",
+                                    "    ",
+                                    "    console.log(\"✅ Rate limit working! Got 429 response.\");",
+                                    "} else {",
+                                    "    pm.test(\"Request successful (within limit)\", function () {",
+                                    "        pm.response.to.have.status(200);",
+                                    "    });",
+                                    "    ",
+                                    "    var remaining = pm.response.headers.get(\"X-Rate-Limit-Remaining\");",
+                                    "    console.log(\"Remaining: \" + remaining);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/percentage?email=student1@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "percentage"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student1@example.com"
+                                }
+                            ]
+                        },
+                        "description": "Use Postman Runner to run this 105 times with 0ms delay. After ~100 requests, you should get 429 error."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Check Rate Limit Response Format",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// This test is designed to trigger rate limit",
+                                    "// Run the previous test 105 times first to hit the limit"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 429) {",
+                                    "    pm.test(\"Status is 429\", function () {",
+                                    "        pm.response.to.have.status(429);",
+                                    "    });",
+                                    "    ",
+                                    "    pm.test(\"Response has correct format\", function () {",
+                                    "        var jsonData = pm.response.json();",
+                                    "        pm.expect(jsonData).to.have.property('error');",
+                                    "        pm.expect(jsonData).to.have.property('message');",
+                                    "        pm.expect(jsonData).to.have.property('retryAfter');",
+                                    "        pm.expect(jsonData.error).to.eql('Rate limit exceeded');",
+                                    "    });",
+                                    "    ",
+                                    "    console.log(\"Response:\", pm.response.json());",
+                                    "} else {",
+                                    "    console.log(\"⚠️ Rate limit not hit yet. Run 'Rapid Requests' test 105 times first.\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/percentage?email=student1@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "percentage"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student1@example.com"
+                                }
+                            ]
+                        },
+                        "description": "Verify the 429 response format when rate limit is exceeded"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Security Tests",
             "item": [
                 {

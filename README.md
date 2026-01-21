@@ -508,12 +508,107 @@ app:
 
 ---
 
+## 🚦 API Rate Limiting
+
+### Overview
+The system implements API rate limiting using Bucket4j to prevent abuse and ensure fair usage. Each user/IP address is limited to a configurable number of requests per time window.
+
+### Features
+- **Token Bucket Algorithm**: Smooth rate limiting with burst support
+- **Per-User Limiting**: Separate limits for each authenticated user (via JWT email)
+- **IP-Based Fallback**: Unauthenticated requests limited by IP address
+- **Configurable**: Easily adjust limits via `application.yml`
+- **Graceful Responses**: Clear error messages with retry-after information
+
+### Configuration
+
+Rate limiting settings are configured in `application.yml`:
+
+```yaml
+app:
+  rate-limit:
+    enabled: true
+    capacity: 100  # Maximum requests allowed
+    refill-tokens: 100  # Tokens to refill
+    refill-duration-minutes: 1  # Refill period
+```
+
+### How It Works
+
+1. **Request arrives** → RateLimitFilter intercepts
+2. **Identify user** → Extract email from JWT or use IP address
+3. **Get bucket** → Retrieve or create token bucket for this user
+4. **Try consume** → Attempt to take 1 token from bucket
+5. **Success** → Request proceeds normally
+6. **Failure** → Return HTTP 429 (Too Many Requests)
+
+### Rate Limit Headers
+
+Successful requests include rate limit information:
+```
+X-Rate-Limit-Remaining: 95
+```
+
+### Rate Limit Exceeded Response
+
+When limit is exceeded, you'll receive:
+```json
+{
+  "error": "Rate limit exceeded",
+  "message": "Too many requests. Please try again in 45 seconds.",
+  "retryAfter": 45
+}
+```
+
+### Testing Rate Limits
+
+**Using Postman:**
+1. Send rapid requests to any protected endpoint
+2. After 100 requests in 1 minute, you'll get 429 error
+3. Wait for the refill period (1 minute)
+4. Bucket refills and requests work again
+
+**Disable Rate Limiting** (for development):
+```yaml
+app:
+  rate-limit:
+    enabled: false
+```
+
+### Customization
+
+**Adjust Limits:**
+- `capacity`: Maximum tokens in bucket (max burst size)
+- `refill-tokens`: How many tokens to add during refill
+- `refill-duration-minutes`: How often to refill
+
+**Example - Stricter Limits:**
+```yaml
+app:
+  rate-limit:
+    capacity: 50
+    refill-tokens: 50
+    refill-duration-minutes: 1  # 50 requests per minute
+```
+
+**Example - More Lenient:**
+```yaml
+app:
+  rate-limit:
+    capacity: 1000
+    refill-tokens: 1000
+    refill-duration-minutes: 60  # 1000 requests per hour
+```
+
+---
+
 ## 🔄 Future Enhancements
 
 - [ ] Admin dashboard for user management
 - [ ] Bulk attendance marking
 - [ ] Attendance reports and analytics
 - [x] Email notifications for low attendance ✅
+- [x] API rate limiting ✅
 - [ ] Export attendance to CSV/PDF
 - [ ] Subject-wise attendance breakdown
 - [ ] Date range filtering
