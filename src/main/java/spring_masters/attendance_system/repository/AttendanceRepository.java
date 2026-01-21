@@ -10,4 +10,6 @@ public interface AttendanceRepository extends MongoRepository<Attendance, String
     List<Attendance> findBySubjectId(String subjectId);
 
     List<Attendance> findByStudentEmail(String studentEmail);
+
+    List<Attendance> findByStudentEmailAndSubjectId(String studentEmail, String subjectId);
 }

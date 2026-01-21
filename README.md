@@ -15,6 +15,7 @@ The Attendance Management System is a comprehensive web application designed to 
 - ✅ **Secure Authentication** - JWT-based authentication with role-based access control
 - 👨‍🏫 **Teacher Dashboard** - Create subjects and mark student attendance
 - 👨‍🎓 **Student Dashboard** - View attendance records and calculate attendance percentage
+- 📧 **Email Notifications** - Automatic low attendance alerts sent to students
 - 🎨 **Beautiful UI** - Modern, responsive design with smooth animations
 - 🔒 **Security** - Spring Security with stateless session management
 - 📊 **MongoDB Integration** - NoSQL database for flexible data storage
@@ -113,20 +114,36 @@ attendance_system/
    - Ensure MongoDB is running on `localhost:27017`
    - Database `attendance_db` will be created automatically
 
-3. **Start the Backend**
+3. **Configure Email Settings** (Optional but recommended)
+   - Open `src/main/resources/application.yml`
+   - Update email configuration:
+     ```yaml
+     spring:
+       mail:
+         username: your-email@gmail.com
+         password: your-app-password  # For Gmail, use App Password
+     app:
+       email:
+         from: your-email@gmail.com
+         attendance-threshold: 75.0
+     ```
+   - **For Gmail**: Enable 2FA and create an [App Password](https://myaccount.google.com/apppasswords)
+   - **For Testing**: Use [Mailtrap](https://mailtrap.io/) to test without sending real emails
+
+4. **Start the Backend**
    ```bash
    ./mvnw.cmd spring-boot:run
    ```
    Backend will start on `http://localhost:8081`
 
-4. **Start the Frontend**
+5. **Start the Frontend**
    ```bash
    cd frontend
    python -m http.server 3000
    ```
    Frontend will be available at `http://localhost:3000`
 
-5. **Access the Application**
+6. **Access the Application**
    - Open your browser and navigate to `http://localhost:3000`
 
 ---
@@ -247,6 +264,40 @@ Response: {
   "teacherEmail": "teacher@example.com"
 }
 ```
+
+### Email Endpoints (Requires TEACHER role)
+
+#### Send Low Attendance Alert (Manual)
+```http
+POST /api/email/send-low-attendance-alert
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/json
+
+{
+  "studentEmail": "student@example.com",
+  "studentName": "John Doe",
+  "subjectName": "Mathematics",
+  "attendancePercentage": 65.5
+}
+
+Response: "Low attendance alert sent successfully to student@example.com"
+```
+
+#### Send Attendance Notification (Manual)
+```http
+POST /api/email/send-attendance-notification
+Authorization: Bearer <JWT_TOKEN>
+Content-Type: application/x-www-form-urlencoded
+
+studentEmail=student@example.com
+&studentName=John Doe
+&subjectName=Mathematics
+&present=true
+
+Response: "Attendance notification sent successfully to student@example.com"
+```
+
+> **Note:** Email notifications are sent automatically when attendance is marked and falls below the configured threshold (default: 75%). The manual endpoints above are for testing or administrative purposes.
 
 ---
 
@@ -382,16 +433,91 @@ Response: {
 
 ---
 
+## 📧 Email Notification System
+
+### Overview
+The system automatically sends email notifications to students when their attendance falls below the configured threshold (default: 75%).
+
+### Features
+- **Automatic Alerts**: Emails sent when marking attendance if percentage drops below threshold
+- **Professional Templates**: Beautiful HTML email templates with branding
+- **Per-Subject Tracking**: Attendance calculated separately for each subject
+- **Manual Triggers**: API endpoints for sending emails manually (testing/admin)
+
+### Configuration
+
+Email settings are configured in `application.yml`:
+
+```yaml
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com
+    password: your-app-password
+
+app:
+  email:
+    from: your-email@gmail.com
+    attendance-threshold: 75.0
+```
+
+### Email Providers
+
+**Gmail** (Production):
+1. Enable 2-factor authentication
+2. Generate App Password: https://myaccount.google.com/apppasswords
+3. Use App Password in configuration
+
+**Mailtrap** (Testing/Development):
+1. Sign up at https://mailtrap.io/
+2. Get SMTP credentials from your inbox
+3. Update configuration:
+   ```yaml
+   spring:
+     mail:
+       host: smtp.mailtrap.io
+       port: 2525
+       username: your-mailtrap-username
+       password: your-mailtrap-password
+   ```
+
+### How It Works
+
+1. Teacher marks attendance for a student
+2. System calculates current attendance percentage for that subject
+3. If percentage < threshold (75%), email is automatically sent
+4. Email contains:
+   - Student name
+   - Subject name
+   - Current attendance percentage
+   - Warning message
+
+### Email Templates
+
+**Low Attendance Alert**:
+- Professional HTML design with gradient header
+- Clear warning message
+- Current attendance percentage highlighted
+- Actionable advice for students
+
+**Attendance Marked Notification** (Optional):
+- Confirmation of attendance marking
+- Subject and date information
+- Present/Absent status
+
+---
+
 ## 🔄 Future Enhancements
 
 - [ ] Admin dashboard for user management
 - [ ] Bulk attendance marking
 - [ ] Attendance reports and analytics
-- [ ] Email notifications for low attendance
+- [x] Email notifications for low attendance ✅
 - [ ] Export attendance to CSV/PDF
 - [ ] Subject-wise attendance breakdown
 - [ ] Date range filtering
-- [ ] Password reset functionality
+- [ ] Password reset functionality via email
 - [ ] Profile management
 - [ ] Dark/Light theme toggle
 

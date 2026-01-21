@@ -364,6 +364,91 @@
             ]
         },
         {
+            "name": "Email Notifications",
+            "item": [
+                {
+                    "name": "Send Low Attendance Alert (Manual)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentEmail\": \"student1@example.com\",\n  \"studentName\": \"John Doe\",\n  \"subjectName\": \"Mathematics\",\n  \"attendancePercentage\": 65.5\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/email/send-low-attendance-alert",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "email",
+                                "send-low-attendance-alert"
+                            ]
+                        },
+                        "description": "Manually trigger a low attendance alert email (requires TEACHER role)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send Attendance Notification (Manual)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/email/send-attendance-notification?studentEmail=student1@example.com&studentName=John Doe&subjectName=Mathematics&present=true",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "email",
+                                "send-attendance-notification"
+                            ],
+                            "query": [
+                                {
+                                    "key": "studentEmail",
+                                    "value": "student1@example.com"
+                                },
+                                {
+                                    "key": "studentName",
+                                    "value": "John Doe"
+                                },
+                                {
+                                    "key": "subjectName",
+                                    "value": "Mathematics"
+                                },
+                                {
+                                    "key": "present",
+                                    "value": "true"
+                                }
+                            ]
+                        },
+                        "description": "Manually trigger an attendance marked notification email (requires TEACHER role)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Security Tests",
             "item": [
                 {
