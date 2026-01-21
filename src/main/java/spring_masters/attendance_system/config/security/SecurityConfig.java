@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/subjects/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers(request -> "OPTIONS".equals(request.getMethod())).permitAll()
                         .requestMatchers("/api/analytics/**").authenticated() // Analytics FIRST - uses method-level
                                                                               // security
