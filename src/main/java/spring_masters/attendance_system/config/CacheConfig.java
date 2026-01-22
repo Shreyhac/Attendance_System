@@ -13,31 +13,10 @@ import java.util.concurrent.TimeUnit;
 @EnableCaching
 public class CacheConfig {
 
-    @Bean
-    public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "studentAnalytics",
-                "subjectStats",
-                "weatherData",
-                "subjects",
-                "users",
-                "attendancePercentage");
-        cacheManager.setCaffeine(caffeineCacheBuilder());
-        return cacheManager;
-    }
-
-    @Bean
-    public Caffeine<Object, Object> caffeineCacheBuilder() {
-        return Caffeine.newBuilder()
-                .initialCapacity(100)
-                .maximumSize(1000)
-                .expireAfterWrite(10, TimeUnit.MINUTES)
-                .recordStats();
-    }
-
     // Custom cache configurations for specific caches
     @Bean
-    public CacheManager customCacheManager() {
+    @org.springframework.context.annotation.Primary
+    public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
 
         // Weather data - cache for 30 minutes (external API)

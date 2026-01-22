@@ -1,0 +1,1032 @@
+{
+    "info": {
+        "_postman_id": "complex-queries-collection-2026",
+        "name": "Attendance System - Complex Queries API",
+        "description": "Complete collection for testing complex query endpoints including date filtering, subject-specific queries, and analytics",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Authentication",
+            "item": [
+                {
+                    "name": "Register Teacher",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Dr. Smith\",\n  \"email\": \"teacher@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"TEACHER\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Register Student",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"STUDENT\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login Teacher",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Login successful\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "// Save token for subsequent requests",
+                                    "pm.environment.set(\"teacher_token\", pm.response.text().replace(/\"/g, ''));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"teacher@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login Student",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Login successful\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.environment.set(\"student_token\", pm.response.text().replace(/\"/g, ''));"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Setup - Create Subject",
+            "item": [
+                {
+                    "name": "Create Mathematics Subject",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Subject created\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "var jsonData = pm.response.json();",
+                                    "pm.environment.set(\"subject_id\", jsonData.id);"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Mathematics\",\n  \"teacherEmail\": \"teacher@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/subject",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "subject"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Setup - Mark Sample Attendance",
+            "item": [
+                {
+                    "name": "Mark Attendance - Present",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentEmail\": \"student@example.com\",\n  \"subjectId\": \"{{subject_id}}\",\n  \"present\": true\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Attendance - Absent (Different Day)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentEmail\": \"student@example.com\",\n  \"subjectId\": \"{{subject_id}}\",\n  \"present\": false\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4. Student Complex Queries",
+            "item": [
+                {
+                    "name": "Get Attendance by Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/subject?email=student@example.com&subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "subject"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Attendance Percentage by Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/subject/percentage?email=student@example.com&subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "subject",
+                                "percentage"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Attendance Between Dates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/daterange?email=student@example.com&startDate=2026-01-01&endDate=2026-01-31",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "daterange"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "startDate",
+                                    "value": "2026-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2026-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Attendance by Subject and Date Range",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/subject/daterange?email=student@example.com&subjectId={{subject_id}}&startDate=2026-01-01&endDate=2026-01-31",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "subject",
+                                "daterange"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                },
+                                {
+                                    "key": "startDate",
+                                    "value": "2026-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2026-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Attendance Percentage Between Dates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/percentage/daterange?email=student@example.com&startDate=2026-01-01&endDate=2026-01-31",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "percentage",
+                                "daterange"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "startDate",
+                                    "value": "2026-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2026-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Total Present Days",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/present/count?email=student@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "present",
+                                "count"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Total Absent Days",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/absent/count?email=student@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "absent",
+                                "count"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check if Attendance Marked Today",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{student_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/student/attendance/today/check?email=student@example.com&subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "student",
+                                "attendance",
+                                "today",
+                                "check"
+                            ],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "5. Teacher Complex Queries",
+            "item": [
+                {
+                    "name": "Get All Attendance for Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/subject?subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "subject"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Attendance by Subject and Date",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/subject/date?subjectId={{subject_id}}&date=2026-01-21",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "subject",
+                                "date"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                },
+                                {
+                                    "key": "date",
+                                    "value": "2026-01-21"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Attendance by Subject and Date Range",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/subject/daterange?subjectId={{subject_id}}&startDate=2026-01-01&endDate=2026-01-31",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "subject",
+                                "daterange"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                },
+                                {
+                                    "key": "startDate",
+                                    "value": "2026-01-01"
+                                },
+                                {
+                                    "key": "endDate",
+                                    "value": "2026-01-31"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Present Students by Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/subject/present?subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "subject",
+                                "present"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Absent Students by Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/subject/absent?subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "subject",
+                                "absent"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Student Attendance in Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/student?studentEmail=student@example.com&subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "student"
+                            ],
+                            "query": [
+                                {
+                                    "key": "studentEmail",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Student Attendance Percentage in Subject",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/student/percentage?studentEmail=student@example.com&subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "student",
+                                "percentage"
+                            ],
+                            "query": [
+                                {
+                                    "key": "studentEmail",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Today's Attendance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/today?subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "today"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Check if Attendance Marked Today",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/today/check?studentEmail=student@example.com&subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "today",
+                                "check"
+                            ],
+                            "query": [
+                                {
+                                    "key": "studentEmail",
+                                    "value": "student@example.com"
+                                },
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Total Attendance Count",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance/count?subjectId={{subject_id}}",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance",
+                                "count"
+                            ],
+                            "query": [
+                                {
+                                    "key": "subjectId",
+                                    "value": "{{subject_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Subjects by Teacher",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/subjects?teacherEmail=teacher@example.com",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "subjects"
+                            ],
+                            "query": [
+                                {
+                                    "key": "teacherEmail",
+                                    "value": "teacher@example.com"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "6. Test Duplicate Prevention",
+            "item": [
+                {
+                    "name": "Mark Attendance Again (Should Update)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{teacher_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"studentEmail\": \"student@example.com\",\n  \"subjectId\": \"{{subject_id}}\",\n  \"present\": false\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8081/api/teacher/attendance",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8081",
+                            "path": [
+                                "api",
+                                "teacher",
+                                "attendance"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "teacher_token",
+            "value": ""
+        },
+        {
+            "key": "student_token",
+            "value": ""
+        },
+        {
+            "key": "subject_id",
+            "value": ""
+        }
+    ]
+}
